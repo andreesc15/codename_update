@@ -1,3 +1,4 @@
+// @ts-nocheck
 function getTeams(){
   var teamParameters = {
     //"muteHttpExceptions" : true,
@@ -23,24 +24,41 @@ function getTeams(){
 
 function updateTeamCode(){
 
-  var listTeams = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet().getRange("A:E").getValues();
+  var listTeams = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet().getRange("A2:E").getValues();
   Logger.log(listTeams);
 
   for (var team of listTeams){
-    var teamParameters = {
-    //"muteHttpExceptions" : true,
-    'method'      : 'post',
-    'contentType' : 'application/json',
-    'headers'     : {'Authorization':'Token '+API_TOKEN},
-    'payload'     : JSON.stringify(
-      {
-        "code_name"       : team[4]
-      })//--end JSON.stringify
-     }; //--end options variable declaration
+    Logger.log(team);
 
-    var postTeam = JSON.parse(team[0], teamParameters);
-    Logger.log(postTeam);
-    
+    var parameters = {
+    "muteHttpExceptions" : true,
+    'method'      : 'get',
+    'contentType' : 'application/json',
+    'headers'     : {'Authorization':'Token '+API_TOKEN}}; //--end options variable declaration
+
+      var getTeam = JSON.parse(UrlFetchApp.fetch(team[0],parameters));
+      Logger.log(getTeam);
+
+      var teamParameters = {
+        'muteHttpExceptions' : true,
+        'method'      : 'post',
+        'contentType' : 'application/json',
+        'headers'     : {'Authorization':'Token '+API_TOKEN},
+        'payload'     : JSON.stringify(
+          {
+            'code_name'             : team[4],
+            'institution'           : getTeam.institution, 
+            'break_categories'      : getTeam.break_categories,
+            'institution_conflicts' : getTeam.institution_conflicts 
+            
+          })//--end JSON.stringify
+          }; //--end options variable declaration
+      
+      Logger.log(teamParameters);
+      var request = UrlFetchApp.fetch(team[0], teamParameters);
+      Logger.log(request);
+
+
   }
 
   
